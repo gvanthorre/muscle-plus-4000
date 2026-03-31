@@ -1,0 +1,113 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+
+env:
+  DOTNET_VERSION: '10.x'
+  NODE_VERSION: '22'
+  API_PROJECT: src/api/MusclePlus4000.Api/MusclePlus4000.Api.csproj
+  TEST_PROJECT: src/api/MusclePlus4000.Tests/MusclePlus4000.Tests.csproj
+  WEB_DIR: src/web
+
+jobs:
+  # ── Backend CI ────────────────────────────────────────────────────────────
+  backend-ci:
+    name: 🔨 Backend – Build & Test
+    runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore ${{ env.API_PROJECT }}
+
+      - name: Build
+        run: dotnet build ${{ env.API_PROJECT }} -c Release --no-restore
+
+      - name: Test
+        run: dotnet run --project ${{ env.API_PROJECT }} -c Release
+
+      - name: Publish
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: dotnet publish ${{ env.API_PROJECT }} -c Release --no-build -o ./publish
+
+      - name: Upload backend artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend
+          path: ./publish
+          retention-days: 1
+
+  # ── Backend CD ────────────────────────────────────────────────────────────
+  deploy-backend:
+    name: 🚀 Deploy Backend → Azure App Service
+    needs: backend-ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend
+          path: ./publish
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_API_APP_NAME }}
+          package: ./publish
+
+  # ── Frontend CI + CD (SWA action handles both) ───────────────────────────
+  deploy-frontend:
+    name: 🚀 Frontend → Azure Static Web Apps
+    runs-on: ubuntu-latest
+    # Run on push to main (production deploy) and on PRs (preview deploy)
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.event.action != 'closed')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Build & Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: ${{ env.WEB_DIR }}
+          output_location: dist
+          # api_location is empty because the API is a separate App Service
+        env:
+          # Injected at Vite build time – referenced as import.meta.env.VITE_API_URL
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+  # ── Staging cleanup ───────────────────────────────────────────────────────
+  close-staging:
+    name: 🧹 Remove PR Staging Environment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    steps:
+      - name: Close staging environment
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN }}
+          action: close
+          app_location: /
