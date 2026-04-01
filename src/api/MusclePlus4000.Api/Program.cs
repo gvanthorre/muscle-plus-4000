@@ -1,6 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using MusclePlus4000.Api.Infrastructure.Persistence;
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
 
 // Add services to the container.
 
@@ -12,13 +18,35 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
+builder.Services.AddDbContext<WorkoutDbContext>(dbContextOptions =>
+    dbContextOptions.UseNpgsql(builder.Configuration["ConnectionStrings:Default"],
+        o => o.MigrationsHistoryTable("__EFMigrationsHistory", "app")));
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<WorkoutDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        await dbContext.Database.OpenConnectionAsync();
+        await dbContext.Database.CloseConnectionAsync();
+        logger.LogInformation("Database connection successful");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Database connection failed");
+        throw;
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
