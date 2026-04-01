@@ -1,3 +1,60 @@
+/* Weather forecast styles */
+.weather-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+}
+
+.weather-table th,
+.weather-table td {
+  padding: 0.65rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.weather-table thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+.weather-table tbody tr:hover {
+  background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+.weather-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  opacity: 0.75;
+}
+
+.weather-error {
+  color: #e05c5c;
+  opacity: 1;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Legacy kept below */
 .counter {
   font-size: 16px;
   padding: 5px 10px;
