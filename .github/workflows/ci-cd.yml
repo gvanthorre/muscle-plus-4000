@@ -69,10 +69,10 @@ jobs:
 
       - name: Set connection string on App Service
         run: |
-          az webapp config connection-string set `
-            --name ${{ secrets.AZURE_API_APP_NAME }} `
-            --resource-group rg-muscleplus4000 `
-            --connection-string-type Custom `
+          az webapp config connection-string set \
+            --name ${{ secrets.AZURE_API_APP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --connection-string-type Custom \
             --settings Default="${{ secrets.NEON_CONNECTION_STRING }}"
 
       - name: Deploy to Azure App Service
