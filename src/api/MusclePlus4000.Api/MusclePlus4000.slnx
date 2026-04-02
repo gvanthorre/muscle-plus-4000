@@ -1,4 +1,7 @@
 <Solution>
+  <Project Path="../MusclePlus4000.Domain/MusclePlus4000.Domain.csproj" />
+  <Project Path="../MusclePlus4000.Application/MusclePlus4000.Application.csproj" />
+  <Project Path="../MusclePlus4000.Infrastructure/MusclePlus4000.Infrastructure.csproj" />
   <Project Path="../MusclePlus4000.Tests/MusclePlus4000.Tests.csproj" />
   <Project Path="MusclePlus4000.Api.csproj" />
 </Solution>

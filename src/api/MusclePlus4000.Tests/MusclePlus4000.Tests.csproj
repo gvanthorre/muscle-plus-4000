@@ -11,4 +11,9 @@
     <PackageReference Include="TUnit.Assertions" Version="1.24.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MusclePlus4000.Application\MusclePlus4000.Application.csproj" />
+    <ProjectReference Include="..\MusclePlus4000.Domain\MusclePlus4000.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
