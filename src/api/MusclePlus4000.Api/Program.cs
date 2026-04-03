@@ -41,9 +41,9 @@ using (var scope = app.Services.CreateScope())
         await dbContext.Database.CloseConnectionAsync();
         logger.LogInformation("Database connection successful");
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-        logger.LogError(ex, "Database connection failed");
+        logger.LogError("Database connection failed");
         throw;
     }
 }
