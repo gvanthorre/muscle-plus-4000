@@ -4,7 +4,7 @@ import { notify } from "../services/snackbarService.ts";
 // import { userManager } from "../features/auth/userManager.ts";
 
 export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL ?? "api",
 });
 
 // apiClient.interceptors.request.use(async (config) => {
