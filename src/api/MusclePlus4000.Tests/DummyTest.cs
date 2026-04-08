@@ -1,10 +1,12 @@
-﻿namespace MusclePlus4000.Tests;
+﻿using Xunit;
+
+namespace MusclePlus4000.Tests;
 
 public class DummyTest
 {
-    [Test]
-    public async Task Dummy()
+    [Fact]
+    public void Dummy()
     {
-        await Assert.That(true).IsTrue();
+        Assert.True(true);
     }
 }
