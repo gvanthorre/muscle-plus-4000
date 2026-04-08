@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 
-namespace MusclePlus4000.Api.Infrastructure.Persistence;
+namespace MusclePlus4000.Infrastructure.Persistence;
 
 public class WorkoutDbContext(
     DbContextOptions<WorkoutDbContext> options
@@ -11,7 +11,8 @@ public class WorkoutDbContext(
     {
         modelBuilder.HasDefaultSchema("app");
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }
+
