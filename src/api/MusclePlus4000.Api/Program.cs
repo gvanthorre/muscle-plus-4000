@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using MusclePlus4000.Api.Infrastructure.Persistence;
+using MusclePlus4000.Infrastructure.Persistence;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
