@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using MusclePlus4000.Application.Abstractions.Persistence;
+using MusclePlus4000.Application.Exercises.Queries.GetAllExercises;
 using MusclePlus4000.Infrastructure.Persistence;
+using MusclePlus4000.Infrastructure.Persistence.Repositories;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -13,6 +16,8 @@ var allowedOrigins = builder.Configuration
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssemblyContaining<GetAllExercisesQuery>());
 
 builder.Services.AddCors(options =>
 {
@@ -25,9 +30,17 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<WorkoutDbContext>(dbContextOptions =>
-    dbContextOptions.UseNpgsql(builder.Configuration["ConnectionStrings:Default"],
-        o => o.MigrationsHistoryTable("__EFMigrationsHistory", "app")));
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<AuditFieldsInterceptor>();
+builder.Services.AddScoped<IExerciseReadRepository, ExerciseReadRepository>();
+
+builder.Services.AddDbContext<WorkoutDbContext>((serviceProvider, dbContextOptions) =>
+    dbContextOptions
+        .UseNpgsql(builder.Configuration["ConnectionStrings:Default"],
+            o => o
+                .MigrationsAssembly("MusclePlus4000.Infrastructure")
+                .MigrationsHistoryTable("__EFMigrationsHistory", "app"))
+        .AddInterceptors(serviceProvider.GetRequiredService<AuditFieldsInterceptor>()));
 
 var app = builder.Build();
 
