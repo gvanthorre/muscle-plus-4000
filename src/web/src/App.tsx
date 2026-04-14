@@ -1,16 +1,48 @@
-import './App.css'
-import { WeatherForecastTable } from './components/WeatherForecastTable'
+import "./App.css";
+import { SnackbarBridge, SnackbarProvider } from "./context/SnackbarContext.tsx";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./router/ProtectedRoute.tsx";
+import HomePage from "./features/home/HomePage.tsx";
+import ForbiddenPage from "./features/forbidden/ForbiddenPage.tsx";
+import NotFoundPage from "./features/notFound/NotFoundPage.tsx";
+import GlobalHeaderLayout from "./layouts/GlobalHeaderLayout.tsx";
 
 function App() {
-  return (
-    <>
-      <section id="center">
-        <h1>🌤️ Weather Forecast</h1>
-        <p>5-day forecast from the Muscle Plus 4000 API</p>
-        <WeatherForecastTable />
-      </section>
-    </>
-  )
+    return (
+        <SnackbarProvider>
+            <SnackbarBridge />
+            <BrowserRouter>
+                <Routes>
+                    <Route element={<GlobalHeaderLayout />}>
+                        <Route
+                            path="/"
+                            element={
+                                <ProtectedRoute>
+                                    <HomePage />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/forbidden"
+                            element={
+                                <ProtectedRoute>
+                                    <ForbiddenPage />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="*"
+                            element={
+                                <ProtectedRoute>
+                                    <NotFoundPage />
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </SnackbarProvider>
+    );
 }
 
-export default App
+export default App;
