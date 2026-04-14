@@ -1,10 +1,15 @@
-﻿import { useState } from "react";
-import { Alert, Snackbar } from "@mui/material";
-import SnackbarContext from "./SnackbarContext.tsx";
-import type { ReactNode } from "react";
+﻿import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import type { AlertSeverity } from "../types/alertSeverity.ts";
+import {Alert, Snackbar} from "@mui/material";
+import {registerSnackbar} from "../services/snackbarService.ts";
 
-const SnackbarProvider = ({ children }: { children: ReactNode }) => {
+interface SnackbarState {
+    showSnackbar: (text: string, alertColor: AlertSeverity) => void;
+}
+
+const SnackbarContext = createContext<SnackbarState | null>(null);
+
+export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [message, setMessage] = useState<string>("");
     const [typeColor, setTypeColor] = useState<AlertSeverity>("info");
@@ -37,4 +42,22 @@ const SnackbarProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-export default SnackbarProvider;
+export const useSnackbarContext = () => {
+    const context = useContext(SnackbarContext);
+
+    if (!context) {
+        throw new Error("useSnackBar must be used within an SnackBarProvider");
+    }
+
+    return context;
+};
+
+export const SnackbarBridge = () => {
+    const { showSnackbar } = useSnackbarContext();
+
+    useEffect(() => {
+        registerSnackbar(showSnackbar);
+    }, [showSnackbar]);
+
+    return null;
+};
