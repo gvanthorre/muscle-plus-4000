@@ -8,7 +8,7 @@ public sealed class Result<T>
         ? _value!
         : throw new InvalidOperationException("Cannot access Value on a failed result.");
 
-    public Error Error { get; }
+    public Error? Error { get; }
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
 
