@@ -17,6 +17,7 @@ public static class DependencyInjection
 
         services.AddScoped<AuditFieldsInterceptor>();
         services.AddScoped<IExerciseReadRepository, ExerciseReadRepository>();
+        services.AddScoped<IExerciseWriteRepository, ExerciseWriteRepository>();
 
         services.AddDbContext<WorkoutDbContext>((serviceProvider, dbContextOptions) =>
             dbContextOptions

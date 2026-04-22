@@ -4,7 +4,7 @@ using MusclePlus4000.Application.Exercises.Queries.GetAllExercises;
 
 namespace MusclePlus4000.Api.Exercises;
 
-public sealed class GetAll : IEndpoint
+public sealed class GetAllExercises : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
